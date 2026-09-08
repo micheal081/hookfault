@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/micheal081/hookfault/main/schema/hookfault.schema.json",
+  "title": "Hookfault scenario",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "target", "deliveries"],
+  "properties": {
+    "$schema": { "type": "string", "format": "uri" },
+    "version": { "const": 1 },
+    "target": { "type": "string", "format": "uri", "pattern": "^https?://" },
+    "headers": { "$ref": "#/$defs/headers" },
+    "sensitiveHeaders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
+      },
+      "default": []
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 300000,
+      "default": 5000
+    },
+    "maxResponseBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1048576,
+      "default": 65536
+    },
+    "retry": { "$ref": "#/$defs/retry" },
+    "signing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "secretEnv"],
+      "properties": {
+        "type": { "const": "stripe" },
+        "secretEnv": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "timestamp": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "deliveries": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/delivery" }
+    },
+    "verify": {
+      "type": "array",
+      "maxItems": 100,
+      "default": [],
+      "items": { "$ref": "#/$defs/verification" }
+    }
+  },
+  "$defs": {
+    "json": {},
+    "headers": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$" },
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[\\t\\u0020-\\u007E\\u0080-\\u00FF]*$"
+      }
+    },
+    "status": {
+      "oneOf": [
+        { "type": "integer", "minimum": 100, "maximum": 599 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max"],
+          "properties": {
+            "min": { "type": "integer", "minimum": 100, "maximum": 599 },
+            "max": { "type": "integer", "minimum": 100, "maximum": 599 }
+          }
+        }
+      ]
+    },
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "bodyContains": { "type": "string" },
+        "jsonSubset": { "$ref": "#/$defs/json" },
+        "maxLatencyMs": { "type": "number", "exclusiveMinimum": 0 },
+        "error": { "enum": ["timeout", "network"] }
+      }
+    },
+    "retry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 1
+        },
+        "delayMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 300000,
+          "default": 0
+        },
+        "statuses": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 100, "maximum": 599 },
+          "default": [429, 500, 502, 503, 504]
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "body": { "$ref": "#/$defs/json" },
+        "rawBody": { "type": "string" },
+        "copies": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 1
+        },
+        "delayMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 300000,
+          "default": 0
+        },
+        "headers": { "$ref": "#/$defs/headers" },
+        "timeoutMs": { "type": "integer", "minimum": 1, "maximum": 300000 },
+        "retry": { "$ref": "#/$defs/retry" },
+        "assert": { "$ref": "#/$defs/assertion" }
+      },
+      "not": { "required": ["body", "rawBody"] }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "url"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "url": { "type": "string", "format": "uri", "pattern": "^https?://" },
+        "method": { "enum": ["GET", "POST"], "default": "GET" },
+        "body": { "$ref": "#/$defs/json" },
+        "headers": { "$ref": "#/$defs/headers" },
+        "delayMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 300000,
+          "default": 0
+        },
+        "assert": { "$ref": "#/$defs/assertion" }
+      },
+      "not": {
+        "required": ["body"],
+        "properties": { "method": { "enum": ["GET"] } }
+      }
+    }
+  }
+}

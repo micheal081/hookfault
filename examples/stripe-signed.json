@@ -1,0 +1,15 @@
+{
+  "$schema": "../schema/hookfault.schema.json",
+  "version": 1,
+  "target": "http://localhost:3000/webhooks/stripe",
+  "signing": { "type": "stripe", "secretEnv": "HOOKFAULT_STRIPE_SECRET" },
+  "sensitiveHeaders": ["X-Internal-Token"],
+  "deliveries": [
+    {
+      "id": "malformed-payment-event",
+      "rawBody": "{\"id\":\"evt_test\",\"type\":",
+      "headers": { "X-Internal-Token": "replace-with-a-test-token" },
+      "assert": { "status": 400, "bodyContains": "invalid" }
+    }
+  ]
+}

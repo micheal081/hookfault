@@ -1,0 +1,38 @@
+{
+  "$schema": "../schema/hookfault.schema.json",
+  "version": 1,
+  "target": "http://127.0.0.1:3000/webhooks/orders",
+  "headers": { "X-Hookfault-Suite": "duplicate-order" },
+  "timeoutMs": 2000,
+  "maxResponseBytes": 32768,
+  "deliveries": [
+    {
+      "id": "newer-order-update",
+      "body": {
+        "id": "evt_new",
+        "type": "order.updated",
+        "data": { "orderId": "ord_123", "state": "paid" }
+      },
+      "copies": 2,
+      "assert": { "status": { "min": 200, "max": 299 }, "maxLatencyMs": 1000 }
+    },
+    {
+      "id": "older-order-update",
+      "delayMs": 50,
+      "body": {
+        "id": "evt_old",
+        "type": "order.updated",
+        "data": { "orderId": "ord_123", "state": "pending" }
+      },
+      "assert": { "status": 202 }
+    }
+  ],
+  "verify": [
+    {
+      "id": "order-was-created-once",
+      "url": "http://127.0.0.1:3000/test-state/orders/ord_123",
+      "delayMs": 100,
+      "assert": { "status": 200, "jsonSubset": { "count": 1, "state": "paid" } }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "name": "hookfault",
+  "version": "0.1.0",
+  "description": "Deterministic webhook failure testing for local development and CI.",
+  "type": "module",
+  "bin": {
+    "hookfault": "dist/cli.js"
+  },
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "schema",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "author": "Micheal (@micheal081)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/micheal081/hookfault.git"
+  },
+  "homepage": "https://github.com/micheal081/hookfault#readme",
+  "bugs": {
+    "url": "https://github.com/micheal081/hookfault/issues"
+  },
+  "keywords": [
+    "webhooks",
+    "testing",
+    "cli",
+    "stripe",
+    "fault-injection",
+    "ci"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "node scripts/package-smoke.mjs",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build && npm run smoke",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^20.19.0",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^3.2.4"
+  }
+}

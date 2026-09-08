@@ -1,0 +1,23 @@
+name: Bug report
+description: Report unexpected Hookfault behavior
+title: 'bug: '
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include a minimal scenario with all credentials and personal data removed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Hookfault version, Node version, and operating system
+    validations:
+      required: true
